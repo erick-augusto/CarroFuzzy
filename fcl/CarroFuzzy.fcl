@@ -1,0 +1,86 @@
+FUNCTION_BLOCK acao	// Block definition (there may be more than one block per file)
+
+// Define input variables
+VAR_INPUT	
+	farol : REAL;
+	velocidade : REAL;
+	distancia : REAL;
+	pista_esquerda : REAL;
+	pista_direita : REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT	
+	freiar : REAL;
+END_VAR
+
+// Fuzzify input variable 'servico': {'ruim', 'bom' , 'excelente'}
+FUZZIFY farol 	
+	TERM verde := (0, 1) (1, 0) (2, 0); 
+    TERM amarelo := (0, 0) (1, 1) (2, 0);
+    TERM vermelho := (0, 0) (1, 0) (2, 1);
+END_FUZZIFY
+
+// Fuzzify input variable 'refeicao': { 'rancosa', 'deliciosa' }
+FUZZIFY distancia			
+	TERM muito_perto := (0, 1) (20, 1) (30,0) ;
+	TERM perto := (20, 0) (30, 1) (40, 1) (50, 0);
+	TERM razoavel := (40, 0) (50, 1) (60, 1) (70, 0);
+	TERM longe := (60, 0) (70, 1) (80, 1) (90, 0);
+	TERM muito_longe := (80, 0) (90, 1) (100,1);
+END_FUZZIFY
+
+// Fuzzify input variable 'refeicao': { 'rancosa', 'deliciosa' }
+FUZZIFY velocidade			
+	TERM muito_baixa := (0, 1) (20, 1) (30,0) ;
+	TERM baixa := (20, 0) (30, 1) (40, 1) (50, 0);
+	TERM razoavel := (40, 0) (50, 1) (60, 1) (70, 0);
+	TERM alta := (60, 0) (70, 1) (80, 1) (90, 0);
+	TERM muito_alta := (80, 0) (90, 1) (100,1);
+END_FUZZIFY
+
+// Fuzzify input variable 'refeicao': { 'rancosa', 'deliciosa' }
+FUZZIFY pista_esquerda			
+	TERM livre := (0, 0) (1, 1);
+END_FUZZIFY
+
+// Fuzzify input variable 'refeicao': { 'rancosa', 'deliciosa' }
+FUZZIFY pista_direita			
+	TERM livre := (0, 0) (1, 1);
+END_FUZZIFY
+
+// Defuzzzify output variable 'gorjeta' : {'baixa', 'media', 'alta' }
+DEFUZZIFY freiar			
+	TERM nada  := (0, 1) (5, 1) (15, 0);
+    TERM muito_pouco := (5, 0) (15, 1) (20, 1) (30, 0);
+    TERM pouco := (20, 0) (30, 1) (40, 1) (50, 0);
+	TERM medio := (40, 0) (50, 1) (60, 1) (70, 0);
+	TERM muito := (60, 0) (70, 1) (80, 1) (90, 0);
+    TERM muito_forte := (80, 0) (90, 1) (100, 1)
+	METHOD  : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and' (also implicit use 'max' for 'or' to fulfill DeMorgans Law)
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+	RULE 1 : IF farol IS vermelho AND distancia IS muito_perto THEN freiar IS muito;
+	RULE 2 : IF farol IS vermelho AND distancia IS perto THEN freiar IS muito;
+	RULE 3 : IF farol IS vermelho AND distancia IS razoavel THEN freiar IS medio;
+	RULE 4 : IF farol IS vermelho AND distancia IS longe THEN freiar IS pouco;
+	RULE 5 : IF farol IS vermelho AND distancia IS muito_longe THEN freiar IS pouco;
+    RULE 6 : IF farol IS amarelo AND distancia IS muito_perto THEN freiar IS nada;
+	RULE 7 : IF farol IS amarelo AND distancia IS perto THEN freiar IS pouco;
+	RULE 8 : IF farol IS amarelo AND distancia IS razoavel THEN freiar IS medio;
+	RULE 9 : IF farol IS amarelo AND distancia IS longe THEN freiar IS medio;
+	RULE 10 : IF farol IS amarelo AND distancia IS muito_longe THEN freiar IS medio;
+    RULE 11 : IF farol IS verde AND distancia IS muito_perto THEN freiar IS nada;
+	RULE 12 : IF farol IS verde AND distancia IS perto THEN freiar IS nada;
+	RULE 13 : IF farol IS verde AND distancia IS razoavel THEN freiar IS nada;
+	RULE 14 : IF farol IS verde AND distancia IS longe THEN freiar IS nada;
+	RULE 15 : IF farol IS verde AND distancia IS muito_longe THEN freiar IS nada;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
