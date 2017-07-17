@@ -1,0 +1,108 @@
+FUNCTION_BLOCK acao	// Block definition (there may be more than one block per file)
+
+// Define input variables
+VAR_INPUT	
+	velocidade : REAL;
+	distancia_carro : REAL;
+	pista_esquerda : REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT	
+	virar_esquerda : REAL;
+END_VAR
+
+// Fuzzify input variable 'refeicao': { 'rancosa', 'deliciosa' }
+FUZZIFY distancia_carro			
+	TERM muito_perto := (0, 1) (20, 1) (30,0) ;
+	TERM perto := (20, 0) (30, 1) (40, 1) (50, 0);
+	TERM razoavel := (40, 0) (50, 1) (60, 1) (70, 0);
+	TERM longe := (60, 0) (70, 1) (80, 1) (90, 0);
+	TERM muito_longe := (80, 0) (90, 1) (100,1);
+END_FUZZIFY
+
+// Fuzzify input variable 'refeicao': { 'rancosa', 'deliciosa' }
+FUZZIFY velocidade			
+	TERM muito_baixa := (0, 1) (20, 1) (30,0) ;
+	TERM baixa := (20, 0) (30, 1) (40, 1) (50, 0);
+	TERM razoavel := (40, 0) (50, 1) (60, 1) (70, 0);
+	TERM alta := (60, 0) (70, 1) (80, 1) (90, 0);
+	TERM muito_alta := (80, 0) (100, 1) (120,1);
+END_FUZZIFY
+
+// Fuzzify input variable 'refeicao': { 'rancosa', 'deliciosa' }
+FUZZIFY pista_esquerda			
+	TERM livre := (0, 0) (1, 1);
+	TERM obstruida := (0, 1) (1, 0);
+END_FUZZIFY
+
+// Defuzzzify output variable 'gorjeta' : {'baixa', 'media', 'alta' }
+DEFUZZIFY virar_esquerda			
+	TERM nao := (0, 1) (1, 0);
+	TERM sim := (0, 0) (1, 1);
+	METHOD  : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and' (also implicit use 'max' for 'or' to fulfill DeMorgans Law)
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+	RULE 1 : IF distancia_carro IS muito_perto AND velocidade IS muito_baixa AND pista_esquerda IS livre THEN virar_esquerda IS nao;
+	RULE 2 : IF distancia_carro IS muito_perto AND velocidade IS muito_baixa AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 3 : IF distancia_carro IS muito_perto AND velocidade IS baixa AND pista_esquerda IS livre THEN virar_esquerda IS nao;
+	RULE 4 : IF distancia_carro IS muito_perto AND velocidade IS baixa AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 5 : IF distancia_carro IS muito_perto AND velocidade IS razoavel AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 6 : IF distancia_carro IS muito_perto AND velocidade IS razoavel AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 7 : IF distancia_carro IS muito_perto AND velocidade IS alta AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 8 : IF distancia_carro IS muito_perto AND velocidade IS alta AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 9 : IF distancia_carro IS muito_perto AND velocidade IS muito_alta AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 10 : IF distancia_carro IS muito_perto AND velocidade IS muito_alta AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	
+	RULE 11 : IF distancia_carro IS perto AND velocidade IS muito_baixa AND pista_esquerda IS livre THEN virar_esquerda IS nao;
+	RULE 12 : IF distancia_carro IS perto AND velocidade IS muito_baixa AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 13 : IF distancia_carro IS perto AND velocidade IS baixa AND pista_esquerda IS livre THEN virar_esquerda IS nao;
+	RULE 14 : IF distancia_carro IS perto AND velocidade IS baixa AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 15 : IF distancia_carro IS perto AND velocidade IS razoavel AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 16 : IF distancia_carro IS perto AND velocidade IS razoavel AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 17 : IF distancia_carro IS perto AND velocidade IS alta AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 18 : IF distancia_carro IS perto AND velocidade IS alta AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 19 : IF distancia_carro IS perto AND velocidade IS muito_alta AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 20 : IF distancia_carro IS perto AND velocidade IS muito_alta AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	
+	RULE 21 : IF distancia_carro IS razoavel AND velocidade IS muito_baixa AND pista_esquerda IS livre THEN virar_esquerda IS nao;
+	RULE 22 : IF distancia_carro IS razoavel AND velocidade IS muito_baixa AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 23 : IF distancia_carro IS razoavel AND velocidade IS baixa AND pista_esquerda IS livre THEN virar_esquerda IS nao;
+	RULE 24 : IF distancia_carro IS razoavel AND velocidade IS baixa AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 25 : IF distancia_carro IS razoavel AND velocidade IS razoavel AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 26 : IF distancia_carro IS razoavel AND velocidade IS razoavel AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 27 : IF distancia_carro IS razoavel AND velocidade IS alta AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 28 : IF distancia_carro IS razoavel AND velocidade IS alta AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 29 : IF distancia_carro IS razoavel AND velocidade IS muito_alta AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 30 : IF distancia_carro IS razoavel AND velocidade IS muito_alta AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	
+	RULE 31 : IF distancia_carro IS longe AND velocidade IS muito_baixa AND pista_esquerda IS livre THEN virar_esquerda IS nao;
+	RULE 32 : IF distancia_carro IS longe AND velocidade IS muito_baixa AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 33 : IF distancia_carro IS longe AND velocidade IS baixa AND pista_esquerda IS livre THEN virar_esquerda IS nao;
+	RULE 34 : IF distancia_carro IS longe AND velocidade IS baixa AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 35 : IF distancia_carro IS longe AND velocidade IS razoavel AND pista_esquerda IS livre THEN virar_esquerda IS nao;
+	RULE 36 : IF distancia_carro IS longe AND velocidade IS razoavel AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 37 : IF distancia_carro IS longe AND velocidade IS alta AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 38 : IF distancia_carro IS longe AND velocidade IS alta AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 39 : IF distancia_carro IS longe AND velocidade IS muito_alta AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 40 : IF distancia_carro IS longe AND velocidade IS muito_alta AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	
+	RULE 41 : IF distancia_carro IS muito_longe AND velocidade IS muito_baixa AND pista_esquerda IS livre THEN virar_esquerda IS nao;
+	RULE 42 : IF distancia_carro IS muito_longe AND velocidade IS muito_baixa AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 43 : IF distancia_carro IS muito_longe AND velocidade IS baixa AND pista_esquerda IS livre THEN virar_esquerda IS nao;
+	RULE 44 : IF distancia_carro IS muito_longe AND velocidade IS baixa AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 45 : IF distancia_carro IS muito_longe AND velocidade IS razoavel AND pista_esquerda IS livre THEN virar_esquerda IS nao;
+	RULE 46 : IF distancia_carro IS muito_longe AND velocidade IS razoavel AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 47 : IF distancia_carro IS muito_longe AND velocidade IS alta AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 48 : IF distancia_carro IS muito_longe AND velocidade IS alta AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+	RULE 49 : IF distancia_carro IS muito_longe AND velocidade IS muito_alta AND pista_esquerda IS livre THEN virar_esquerda IS sim;
+	RULE 50 : IF distancia_carro IS muito_longe AND velocidade IS muito_alta AND pista_esquerda IS obstruida THEN virar_esquerda IS nao;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
