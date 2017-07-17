@@ -1,0 +1,124 @@
+FUNCTION_BLOCK acao	// Block definition (there may be more than one block per file)
+
+// Define input variables
+VAR_INPUT	
+	farol : REAL;
+	velocidade : REAL;
+	distancia : REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT	
+	acelerar : REAL;
+END_VAR
+
+// Fuzzify input variable 'servico': {'ruim', 'bom' , 'excelente'}
+FUZZIFY farol 	
+	TERM verde := (0, 1) (1, 0) (2, 0); 
+    TERM amarelo := (0, 0) (1, 1) (2, 0);
+    TERM vermelho := (0, 0) (1, 0) (2, 1);
+END_FUZZIFY
+
+// Fuzzify input variable 'refeicao': { 'rancosa', 'deliciosa' }
+FUZZIFY distancia			
+	TERM muito_perto := (0, 1) (20, 1) (30,0) ;
+	TERM perto := (20, 0) (30, 1) (40, 1) (50, 0);
+	TERM razoavel := (40, 0) (50, 1) (60, 1) (70, 0);
+	TERM longe := (60, 0) (70, 1) (80, 1) (90, 0);
+	TERM muito_longe := (80, 0) (90, 1) (100,1);
+END_FUZZIFY
+
+// Fuzzify input variable 'refeicao': { 'rancosa', 'deliciosa' }
+FUZZIFY velocidade			
+	TERM muito_baixa := (0, 1) (20, 1) (30,0) ;
+	TERM baixa := (20, 0) (30, 1) (40, 1) (50, 0);
+	TERM razoavel := (40, 0) (50, 1) (60, 1) (70, 0);
+	TERM alta := (60, 0) (70, 1) (80, 1) (90, 0);
+	TERM muito_alta := (80, 0) (100, 1) (120,1);
+END_FUZZIFY
+
+// Defuzzzify output variable 'gorjeta' : {'baixa', 'media', 'alta' }
+DEFUZZIFY acelerar			
+	TERM nada  := (0, 1) (5, 1) (10, 0);
+    TERM muito_pouco := (5, 0) (15, 1) (20, 1) (30, 0);
+    TERM pouco := (20, 0) (30, 1) (40, 1) (50, 0);
+	TERM medio := (40, 0) (50, 1) (60, 1) (70, 0);
+	TERM muito := (60, 0) (70, 1) (80, 1) (90, 0);
+    TERM muito_forte := (80, 0) (90, 1) (100, 1);
+	METHOD  : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and' (also implicit use 'max' for 'or' to fulfill DeMorgans Law)
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+	RULE 1 : IF farol IS vermelho THEN acelerar IS nada;	
+	//RULE 2 : IF farol IS vermelho AND distancia IS perto THEN acelerar IS nada;
+	//RULE 3 : IF farol IS vermelho AND distancia IS razoavel THEN acelerar IS nada;
+	//RULE 4 : IF farol IS vermelho AND distancia IS longe THEN acelerar IS nada;
+	//RULE 5 : IF farol IS vermelho AND distancia IS muito_longe THEN acelerar IS nada;
+	
+    RULE 2 : IF farol IS amarelo AND distancia IS muito_perto AND velocidade IS muito_baixa THEN acelerar IS muito;
+	RULE 3 : IF farol IS amarelo AND distancia IS muito_perto AND velocidade IS baixa THEN acelerar IS medio;
+	RULE 4 : IF farol IS amarelo AND distancia IS muito_perto AND velocidade IS razoavel THEN acelerar IS medio;
+	RULE 5 : IF farol IS amarelo AND distancia IS muito_perto AND velocidade IS alta THEN acelerar IS pouco;
+	RULE 6 : IF farol IS amarelo AND distancia IS muito_perto AND velocidade IS muito_alta THEN acelerar IS muito_pouco;
+	
+	RULE 7 : IF farol IS amarelo AND distancia IS perto AND velocidade IS muito_baixa THEN acelerar IS muito;
+	RULE 8 : IF farol IS amarelo AND distancia IS perto AND velocidade IS baixa THEN acelerar IS muito;
+	RULE 9 : IF farol IS amarelo AND distancia IS perto AND velocidade IS razoavel THEN acelerar IS medio;
+	RULE 10 : IF farol IS amarelo AND distancia IS perto AND velocidade IS alta THEN acelerar IS pouco;
+	RULE 11 : IF farol IS amarelo AND distancia IS perto AND velocidade IS muito_alta THEN acelerar IS muito_pouco;
+	
+	RULE 12 : IF farol IS amarelo AND distancia IS razoavel AND velocidade IS muito_baixa THEN acelerar IS muito_forte;
+	RULE 13 : IF farol IS amarelo AND distancia IS razoavel AND velocidade IS baixa THEN acelerar IS muito_forte;
+	RULE 14 : IF farol IS amarelo AND distancia IS razoavel AND velocidade IS razoavel THEN acelerar IS muito;
+	RULE 15 : IF farol IS amarelo AND distancia IS razoavel AND velocidade IS alta THEN acelerar IS nada;
+	RULE 16 : IF farol IS amarelo AND distancia IS razoavel AND velocidade IS muito_alta THEN acelerar IS nada;
+	
+	RULE 17 : IF farol IS amarelo AND distancia IS longe AND velocidade IS muito_baixa THEN acelerar IS nada;
+	RULE 18 : IF farol IS amarelo AND distancia IS longe AND velocidade IS baixa THEN acelerar IS nada;
+	RULE 19 : IF farol IS amarelo AND distancia IS longe AND velocidade IS razoavel THEN acelerar IS nada;
+	RULE 20 : IF farol IS amarelo AND distancia IS longe AND velocidade IS alta THEN acelerar IS nada;
+	RULE 21 : IF farol IS amarelo AND distancia IS longe AND velocidade IS muito_alta THEN acelerar IS nada;
+	
+	RULE 22 : IF farol IS amarelo AND distancia IS muito_longe AND velocidade IS muito_baixa THEN acelerar IS nada;
+	RULE 23 : IF farol IS amarelo AND distancia IS muito_longe AND velocidade IS baixa THEN acelerar IS nada;
+	RULE 24 : IF farol IS amarelo AND distancia IS muito_longe AND velocidade IS razoavel THEN acelerar IS nada;
+	RULE 25 : IF farol IS amarelo AND distancia IS muito_longe AND velocidade IS alta THEN acelerar IS nada;
+	RULE 26 : IF farol IS amarelo AND distancia IS muito_longe AND velocidade IS muito_alta THEN acelerar IS nada;
+
+    RULE 27 : IF farol IS verde AND distancia IS muito_perto AND velocidade IS muito_baixa THEN acelerar IS muito_forte;
+	RULE 28 : IF farol IS verde AND distancia IS muito_perto AND velocidade IS baixa THEN acelerar IS muito;
+	RULE 29 : IF farol IS verde AND distancia IS muito_perto AND velocidade IS razoavel THEN acelerar IS medio;
+	RULE 30 : IF farol IS verde AND distancia IS muito_perto AND velocidade IS alta THEN acelerar IS pouco;
+	RULE 31 : IF farol IS verde AND distancia IS muito_perto AND velocidade IS muito_alta THEN acelerar IS muito_pouco;
+	
+	RULE 32 : IF farol IS verde AND distancia IS perto AND velocidade IS muito_baixa THEN acelerar IS muito_forte;
+	RULE 33 : IF farol IS verde AND distancia IS perto AND velocidade IS baixa THEN acelerar IS muito;
+	RULE 34 : IF farol IS verde AND distancia IS perto AND velocidade IS razoavel THEN acelerar IS medio;
+	RULE 35 : IF farol IS verde AND distancia IS perto AND velocidade IS alta THEN acelerar IS pouco;
+	RULE 36 : IF farol IS verde AND distancia IS perto AND velocidade IS muito_alta THEN acelerar IS muito_pouco;
+	
+	RULE 37 : IF farol IS verde AND distancia IS razoavel AND velocidade IS muito_baixa THEN acelerar IS muito_forte;
+	RULE 38 : IF farol IS verde AND distancia IS razoavel AND velocidade IS baixa THEN acelerar IS muito;
+	RULE 39 : IF farol IS verde AND distancia IS razoavel AND velocidade IS razoavel THEN acelerar IS medio;
+	RULE 40 : IF farol IS verde AND distancia IS razoavel AND velocidade IS alta THEN acelerar IS pouco;
+	RULE 41 : IF farol IS verde AND distancia IS razoavel AND velocidade IS muito_alta THEN acelerar IS muito_pouco;
+	
+	RULE 42 : IF farol IS verde AND distancia IS longe AND velocidade IS muito_baixa THEN acelerar IS muito_forte;
+	RULE 43 : IF farol IS verde AND distancia IS longe AND velocidade IS baixa THEN acelerar IS muito;
+	RULE 44 : IF farol IS verde AND distancia IS longe AND velocidade IS razoavel THEN acelerar IS medio;
+	RULE 45 : IF farol IS verde AND distancia IS longe AND velocidade IS alta THEN acelerar IS pouco;
+	RULE 46 : IF farol IS verde AND distancia IS longe AND velocidade IS muito_alta THEN acelerar IS muito_pouco;
+	
+	RULE 47 : IF farol IS verde AND distancia IS muito_longe AND velocidade IS muito_baixa THEN acelerar IS muito_forte;
+	RULE 48 : IF farol IS verde AND distancia IS muito_longe AND velocidade IS baixa THEN acelerar IS muito;
+	RULE 49 : IF farol IS verde AND distancia IS muito_longe AND velocidade IS razoavel THEN acelerar IS medio;
+	RULE 50 : IF farol IS verde AND distancia IS muito_longe AND velocidade IS alta THEN acelerar IS pouco;
+	RULE 51 : IF farol IS verde AND distancia IS muito_longe AND velocidade IS muito_alta THEN acelerar IS muito_pouco;
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
